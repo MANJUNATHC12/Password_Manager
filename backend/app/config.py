@@ -16,6 +16,16 @@ class Settings(BaseSettings):
         default="postgresql+asyncpg://postgres:postgres@db:5432/password_manager"
     )
 
+    @field_validator("database_url", mode="before")
+    @classmethod
+    def parse_database_url(cls, v: str) -> str:
+        if isinstance(v, str):
+            if v.startswith("postgres://"):
+                return v.replace("postgres://", "postgresql+asyncpg://", 1)
+            elif v.startswith("postgresql://"):
+                return v.replace("postgresql://", "postgresql+asyncpg://", 1)
+        return v
+
     secret_key: str = Field(default="change-me-in-production")
     algorithm: str = "HS256"
     access_token_expire_minutes: int = 30
