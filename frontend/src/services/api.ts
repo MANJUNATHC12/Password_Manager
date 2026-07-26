@@ -1,19 +1,22 @@
 import axios from 'axios'
 
-const BASE_URL =
-  import.meta.env.VITE_API_URL && import.meta.env.VITE_API_URL !== '/api/v1'
-    ? import.meta.env.VITE_API_URL
-    : 'https://password-manager-api-t8m3.onrender.com/api/v1'
+let rawUrl =
+  import.meta.env.VITE_API_URL ||
+  'https://password-manager-api-t8m3.onrender.com/api/v1'
+
+// Strip trailing slashes
+rawUrl = rawUrl.replace(/\/+$/, '')
+
+// Extract root host domain (without /api/v1)
+const rootHost = rawUrl.replace(/\/api\/v1\/?$/, '')
 
 export const api = axios.create({
-  baseURL: BASE_URL,
+  baseURL: rootHost,
   withCredentials: true,
 })
 
-// A bare instance used only for the refresh call, so a 401 from /auth/refresh
-// does not recurse through the response interceptor defined below.
 const refreshClient = axios.create({
-  baseURL: BASE_URL,
+  baseURL: rootHost,
   withCredentials: true,
 })
 
@@ -33,6 +36,12 @@ export function setAuthHeader(token: string | null) {
 }
 
 api.interceptors.request.use((config) => {
+  if (config.url) {
+    const cleanPath = config.url.startsWith('/') ? config.url : `/${config.url}`
+    if (!cleanPath.startsWith('/api/v1')) {
+      config.url = `/api/v1${cleanPath}`
+    }
+  }
   const { access } = getTokens()
   if (access) {
     config.headers.Authorization = `Bearer ${access}`
@@ -85,7 +94,7 @@ api.interceptors.response.use(
 
     isRefreshing = true
     try {
-      const { data } = await refreshClient.post('/auth/refresh', {
+      const { data } = await refreshClient.post('/api/v1/auth/refresh', {
         refresh_token: refresh,
       })
       localStorage.setItem('access_token', data.access_token)
