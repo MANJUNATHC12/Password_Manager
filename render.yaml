@@ -29,7 +29,7 @@ services:
         value: "false"
       # ⚠️ Set CORS_ORIGINS after Vercel deployment — add your Vercel URL here
       - key: CORS_ORIGINS
-        value: "https://your-app.vercel.app,http://localhost:3000"
+        value: "*"
 
 # ── PostgreSQL Database ────────────────────────────────────────────
 databases:

@@ -1,6 +1,8 @@
 from functools import lru_cache
+import json
+from typing import Union
 from pydantic_settings import BaseSettings
-from pydantic import Field
+from pydantic import Field, field_validator
 
 
 class Settings(BaseSettings):
@@ -19,9 +21,24 @@ class Settings(BaseSettings):
     access_token_expire_minutes: int = 30
     refresh_token_expire_days: int = 7
 
-    # Accepts a comma-separated string from env:
-    # CORS_ORIGINS=https://myapp.vercel.app,http://localhost:3000
-    cors_origins: list[str] = Field(default=["http://localhost:3000"])
+    cors_origins: Union[list[str], str] = Field(default=["*"])
+
+    @field_validator("cors_origins", mode="before")
+    @classmethod
+    def parse_cors_origins(cls, v: Union[str, list[str]]) -> list[str]:
+        if isinstance(v, str):
+            v_trimmed = v.strip()
+            if v_trimmed.startswith("[") and v_trimmed.endswith("]"):
+                try:
+                    parsed = json.loads(v_trimmed)
+                    if isinstance(parsed, list):
+                        return [str(item).strip() for item in parsed]
+                except Exception:
+                    pass
+            return [item.strip() for item in v_trimmed.split(",") if item.strip()]
+        if isinstance(v, list):
+            return [str(item).strip() for item in v]
+        return ["*"]
 
     argon2_time_cost: int = 3
     argon2_memory_cost: int = 65536
