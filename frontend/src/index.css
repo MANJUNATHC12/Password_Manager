@@ -6,20 +6,169 @@
   color-scheme: light;
 }
 
+.dark {
+  color-scheme: dark;
+}
+
 body {
   @apply bg-slate-50 text-slate-900 antialiased;
   font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  transition: background-color 0.2s ease, color 0.2s ease;
 }
 
+.dark body {
+  background-color: #020617; /* slate-950 */
+  color: #f1f5f9; /* slate-100 */
+}
+
+/* ── Scrollbar ─────────────────────────────── */
 ::-webkit-scrollbar {
   width: 10px;
   height: 10px;
 }
 
 ::-webkit-scrollbar-thumb {
-  @apply rounded-full bg-slate-300;
+  background-color: #cbd5e1; /* slate-300 */
+  border-radius: 9999px;
+}
+
+.dark ::-webkit-scrollbar-thumb {
+  background-color: #475569; /* slate-600 */
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  @apply bg-slate-400;
+  background-color: #94a3b8; /* slate-400 */
+}
+
+.dark ::-webkit-scrollbar-thumb:hover {
+  background-color: #64748b; /* slate-500 */
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+/* ── Global dark mode surface overrides ──────────────────────── */
+/*
+  Using raw CSS values (not @apply) to avoid circular-dependency
+  errors from PostCSS when the selector name matches the utility.
+*/
+
+/* White cards / panels */
+.dark .bg-white {
+  background-color: #1e293b !important; /* slate-800 */
+}
+
+/* Slate-50 surfaces */
+.dark .bg-slate-50 {
+  background-color: #0f172a !important; /* slate-900 */
+}
+
+/* Slate-100 (e.g. progress track, empty badge bg) */
+.dark .bg-slate-100 {
+  background-color: #334155 !important; /* slate-700 */
+}
+
+/* Borders */
+.dark .border-slate-200 {
+  border-color: #334155 !important; /* slate-700 */
+}
+
+.dark .border-slate-300 {
+  border-color: #475569 !important; /* slate-600 */
+}
+
+.dark .border-dashed {
+  border-color: #475569 !important;
+}
+
+/* Text */
+.dark .text-slate-900 {
+  color: #f1f5f9 !important; /* slate-100 */
+}
+
+.dark .text-slate-800 {
+  color: #e2e8f0 !important; /* slate-200 */
+}
+
+.dark .text-slate-700 {
+  color: #cbd5e1 !important; /* slate-300 */
+}
+
+.dark .text-slate-600 {
+  color: #94a3b8 !important; /* slate-400 */
+}
+
+/* slate-500 intentionally kept neutral — no override needed */
+
+/* Hover backgrounds */
+.dark .hover\:bg-slate-100:hover {
+  background-color: #334155 !important; /* slate-700 */
+}
+
+.dark .hover\:bg-slate-50:hover {
+  background-color: #1e293b !important; /* slate-800 */
+}
+
+/* Input / Select / Textarea */
+.dark input:not([type="checkbox"]):not([type="radio"]),
+.dark select,
+.dark textarea {
+  background-color: #334155; /* slate-700 */
+  border-color: #475569;     /* slate-600 */
+  color: #f1f5f9;            /* slate-100 */
+}
+
+.dark input::placeholder,
+.dark textarea::placeholder {
+  color: #94a3b8; /* slate-400 */
+}
+
+.dark input:focus,
+.dark select:focus,
+.dark textarea:focus {
+  border-color: #16a34a; /* primary-600 */
+  outline: none;
+}
+
+/* ── Coloured tint panels (green, amber, red, primary) ────────── */
+
+.dark .bg-green-50 {
+  background-color: rgb(20 83 45 / 0.3) !important;
+}
+.dark .border-green-200 {
+  border-color: #166534 !important; /* green-800 */
+}
+.dark .text-green-700 {
+  color: #4ade80 !important; /* green-400 */
+}
+
+.dark .bg-amber-50 {
+  background-color: rgb(120 53 15 / 0.3) !important;
+}
+.dark .border-amber-200 {
+  border-color: #92400e !important; /* amber-800 */
+}
+.dark .text-amber-700 {
+  color: #fbbf24 !important; /* amber-400 */
+}
+
+.dark .bg-red-50 {
+  background-color: rgb(127 29 29 / 0.3) !important;
+}
+.dark .border-red-200 {
+  border-color: #991b1b !important; /* red-800 */
+}
+.dark .text-red-700 {
+  color: #f87171 !important; /* red-400 */
+}
+
+.dark .bg-primary-50 {
+  background-color: rgb(20 83 45 / 0.25) !important;
+}
+.dark .border-primary-200 {
+  border-color: #166534 !important; /* primary-800 */
+}
+.dark .text-primary-700 {
+  color: #4ade80 !important; /* primary-400 */
 }

@@ -19,6 +19,8 @@ class Settings(BaseSettings):
     access_token_expire_minutes: int = 30
     refresh_token_expire_days: int = 7
 
+    # Accepts a comma-separated string from env:
+    # CORS_ORIGINS=https://myapp.vercel.app,http://localhost:3000
     cors_origins: list[str] = Field(default=["http://localhost:3000"])
 
     argon2_time_cost: int = 3

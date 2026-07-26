@@ -1,0 +1,39 @@
+# render.yaml — Render.com deployment config
+# Deploys FastAPI backend + PostgreSQL database
+
+services:
+  # ── FastAPI Backend ────────────────────────────────────────────
+  - type: web
+    name: password-manager-api
+    runtime: docker
+    dockerfilePath: ./backend/Dockerfile
+    dockerContext: ./backend
+    plan: free
+    healthCheckPath: /api/v1/health
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: password-manager-db
+          property: connectionString
+      - key: SECRET_KEY
+        generateValue: true        # Render auto-generates a secure random value
+      - key: ALGORITHM
+        value: HS256
+      - key: ACCESS_TOKEN_EXPIRE_MINUTES
+        value: "30"
+      - key: REFRESH_TOKEN_EXPIRE_DAYS
+        value: "7"
+      - key: ENVIRONMENT
+        value: production
+      - key: DEBUG
+        value: "false"
+      # ⚠️ Set CORS_ORIGINS after Vercel deployment — add your Vercel URL here
+      - key: CORS_ORIGINS
+        value: "https://your-app.vercel.app,http://localhost:3000"
+
+# ── PostgreSQL Database ────────────────────────────────────────────
+databases:
+  - name: password-manager-db
+    plan: free
+    databaseName: password_manager
+    user: password_manager

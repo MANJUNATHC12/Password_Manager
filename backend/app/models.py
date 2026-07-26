@@ -191,3 +191,50 @@ class Expense(Base):
 
     def __repr__(self) -> str:
         return f"<Expense(id={self.id}, amount={self.amount}, category={self.category})>"
+
+
+class GroceryItem(Base):
+    __tablename__ = "grocery_items"
+
+    id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True),
+        primary_key=True,
+        default=uuid.uuid4,
+    )
+    user_id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True),
+        ForeignKey("users.id", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
+    )
+    month: Mapped[str] = mapped_column(Text, nullable=False)  # YYYY-MM
+    name: Mapped[str] = mapped_column(Text, nullable=False)
+    quantity: Mapped[Decimal] = mapped_column(Numeric(10, 3), nullable=False, default=1)
+    unit: Mapped[str] = mapped_column(Text, nullable=False, default="pcs")
+    category: Mapped[str] = mapped_column(Text, nullable=False, default="Other")
+    estimated_price: Mapped[Optional[Decimal]] = mapped_column(
+        Numeric(12, 2), nullable=True
+    )
+    is_purchased: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
+    notes: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        default=lambda: datetime.now(timezone.utc),
+        nullable=False,
+    )
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        default=lambda: datetime.now(timezone.utc),
+        onupdate=lambda: datetime.now(timezone.utc),
+        nullable=False,
+    )
+
+    user: Mapped["User"] = relationship("User")
+
+    __table_args__ = (
+        Index("ix_grocery_items_user_month", "user_id", "month"),
+        Index("ix_grocery_items_user_category", "user_id", "category"),
+    )
+
+    def __repr__(self) -> str:
+        return f"<GroceryItem(id={self.id}, name={self.name}, month={self.month})>"

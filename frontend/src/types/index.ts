@@ -139,3 +139,53 @@ export interface DocumentForm {
   notes: string
   file: File | null
 }
+
+// ─── Grocery ──────────────────────────────────────────────────
+
+export interface GroceryItem {
+  id: string
+  month: string // YYYY-MM
+  name: string
+  quantity: number
+  unit: string
+  category: string
+  estimated_price: number | null
+  is_purchased: boolean
+  notes: string | null
+  created_at: string
+  updated_at: string
+}
+
+export interface GroceryList {
+  items: GroceryItem[]
+  total: number
+  purchased_count: number
+  remaining_count: number
+  estimated_total: number
+}
+
+export interface GroceryCategoryBreakdown {
+  category: string
+  total: number
+  count: number
+  purchased: number
+}
+
+export interface GrocerySummary {
+  month: string
+  total: number
+  purchased: number
+  remaining: number
+  estimated_total: number
+  by_category: GroceryCategoryBreakdown[]
+}
+
+export interface GroceryForm {
+  name: string
+  quantity: string
+  unit: string
+  category: string
+  estimated_price: string
+  notes: string
+}
+

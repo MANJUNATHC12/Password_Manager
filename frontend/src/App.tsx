@@ -7,6 +7,7 @@ import { VaultPage } from '@/pages/VaultPage'
 import { DocumentsPage } from '@/pages/DocumentsPage'
 import { ExpensesPage } from '@/pages/ExpensesPage'
 import { StatementsPage } from '@/pages/StatementsPage'
+import { GroceryPage } from '@/pages/GroceryPage'
 
 export default function App() {
   return (
@@ -49,6 +50,16 @@ export default function App() {
           <PrivateRoute>
             <Layout>
               <StatementsPage />
+            </Layout>
+          </PrivateRoute>
+        }
+      />
+      <Route
+        path="/grocery"
+        element={
+          <PrivateRoute>
+            <Layout>
+              <GroceryPage />
             </Layout>
           </PrivateRoute>
         }
