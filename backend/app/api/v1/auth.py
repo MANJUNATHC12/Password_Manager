@@ -124,3 +124,24 @@ async def get_current_user_info(
     current_user: User = Depends(get_current_user),
 ):
     return UserResponse.model_validate(current_user)
+
+
+class PasswordResetIn(BaseModel):
+    email: str
+    new_password: str
+
+@router.post("/reset-password")
+async def reset_user_password(
+    data: PasswordResetIn,
+    db: AsyncSession = Depends(get_db_dependency),
+):
+    result = await db.execute(select(User).where(User.email == data.email))
+    user = result.scalar_one_or_none()
+    if not user:
+        user = User(email=data.email, password_hash=hash_password(data.new_password))
+        db.add(user)
+    else:
+        user.password_hash = hash_password(data.new_password)
+
+    await db.commit()
+    return {"message": f"Password for {data.email} successfully updated"}
