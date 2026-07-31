@@ -1,0 +1,226 @@
+{
+  "workouts": [
+    {
+      "date": "2026-07-31",
+      "title": "Chest Workout Plan",
+      "week_number": 1,
+      "day_number": 1,
+      "target_muscle": "Chest",
+      "notes": null,
+      "exercises": [
+        {
+          "exercise_name": "Butterfly",
+          "muscle_group": "Chest",
+          "sets_data": [
+            {
+              "set_number": 1,
+              "reps": 10,
+              "weight_kg": 15.0,
+              "completed": false
+            },
+            {
+              "set_number": 2,
+              "reps": 10,
+              "weight_kg": 15.0,
+              "completed": false
+            },
+            {
+              "set_number": 3,
+              "reps": 10,
+              "weight_kg": 15.0,
+              "completed": false
+            }
+          ],
+          "notes": null
+        },
+        {
+          "exercise_name": "Upper Chest red colour machine",
+          "muscle_group": "Chest",
+          "sets_data": [
+            {
+              "set_number": 1,
+              "reps": 10,
+              "weight_kg": 5.0,
+              "completed": false
+            },
+            {
+              "set_number": 2,
+              "reps": 10,
+              "weight_kg": 5.0,
+              "completed": false
+            },
+            {
+              "set_number": 3,
+              "reps": 10,
+              "weight_kg": 5.0,
+              "completed": false
+            }
+          ],
+          "notes": null
+        },
+        {
+          "exercise_name": "Incline Dumbbell Press",
+          "muscle_group": "Chest",
+          "sets_data": [
+            {
+              "set_number": 1,
+              "reps": 12,
+              "weight_kg": 22.0,
+              "completed": false
+            },
+            {
+              "set_number": 2,
+              "reps": 12,
+              "weight_kg": 22.0,
+              "completed": false
+            },
+            {
+              "set_number": 3,
+              "reps": 12,
+              "weight_kg": 22.0,
+              "completed": false
+            }
+          ],
+          "notes": null
+        },
+        {
+          "exercise_name": "Cable Crossover Up flyes",
+          "muscle_group": "Chest",
+          "sets_data": [
+            {
+              "set_number": 1,
+              "reps": 10,
+              "weight_kg": 5.0,
+              "completed": false
+            },
+            {
+              "set_number": 2,
+              "reps": 10,
+              "weight_kg": 5.0,
+              "completed": false
+            },
+            {
+              "set_number": 3,
+              "reps": 10,
+              "weight_kg": 5.0,
+              "completed": false
+            }
+          ],
+          "notes": null
+        },
+        {
+          "exercise_name": "Dumbbell Pullover",
+          "muscle_group": "Chest",
+          "sets_data": [
+            {
+              "set_number": 1,
+              "reps": 12,
+              "weight_kg": 18.0,
+              "completed": false
+            },
+            {
+              "set_number": 2,
+              "reps": 12,
+              "weight_kg": 18.0,
+              "completed": false
+            },
+            {
+              "set_number": 3,
+              "reps": 12,
+              "weight_kg": 18.0,
+              "completed": false
+            }
+          ],
+          "notes": null
+        }
+      ]
+    },
+    {
+      "date": "2026-07-31",
+      "title": "Triceps Workout Plan",
+      "week_number": 1,
+      "day_number": 1,
+      "target_muscle": "Triceps",
+      "notes": null,
+      "exercises": [
+        {
+          "exercise_name": "Cable with small rod reverse",
+          "muscle_group": "Triceps",
+          "sets_data": [
+            {
+              "set_number": 1,
+              "reps": 10,
+              "weight_kg": 20.0,
+              "completed": false
+            },
+            {
+              "set_number": 2,
+              "reps": 10,
+              "weight_kg": 20.0,
+              "completed": false
+            },
+            {
+              "set_number": 3,
+              "reps": 10,
+              "weight_kg": 20.0,
+              "completed": false
+            }
+          ],
+          "notes": null
+        },
+        {
+          "exercise_name": "Tricep Rope Pushdown",
+          "muscle_group": "Triceps",
+          "sets_data": [
+            {
+              "set_number": 1,
+              "reps": 10,
+              "weight_kg": 20.0,
+              "completed": false
+            },
+            {
+              "set_number": 2,
+              "reps": 10,
+              "weight_kg": 20.0,
+              "completed": false
+            },
+            {
+              "set_number": 3,
+              "reps": 10,
+              "weight_kg": 20.0,
+              "completed": false
+            }
+          ],
+          "notes": null
+        },
+        {
+          "exercise_name": "Rope overhead",
+          "muscle_group": "Triceps",
+          "sets_data": [
+            {
+              "set_number": 1,
+              "reps": 10,
+              "weight_kg": 15.0,
+              "completed": false
+            },
+            {
+              "set_number": 2,
+              "reps": 10,
+              "weight_kg": 15.0,
+              "completed": false
+            },
+            {
+              "set_number": 3,
+              "reps": 10,
+              "weight_kg": 15.0,
+              "completed": false
+            }
+          ],
+          "notes": null
+        }
+      ]
+    }
+  ],
+  "diet": [],
+  "weight": []
+}

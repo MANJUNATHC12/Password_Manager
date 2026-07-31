@@ -122,6 +122,11 @@ class GymWorkoutCreateIn(BaseModel):
     notes: Optional[str] = None
     exercises: list[GymExerciseIn] = Field(default_factory=list)
 
+class GymBackupImportIn(BaseModel):
+    workouts: list[GymWorkoutCreateIn] = Field(default_factory=list)
+    diet: list[GymDietIn] = Field(default_factory=list)
+    weight: list[GymWeightIn] = Field(default_factory=list)
+
 class GymWorkoutUpdateIn(BaseModel):
     title: Optional[str] = None
     week_number: Optional[int] = None
@@ -510,6 +515,53 @@ async def delete_weight_log(
 
     await db.delete(log)
     await db.commit()
+
+
+@router.post("/sync-backup")
+async def import_gym_backup(
+    data: GymBackupImportIn,
+    current_user=Depends(get_current_user),
+    db: AsyncSession = Depends(get_db_dependency),
+):
+    imported_workouts = 0
+    for w_data in data.workouts:
+        dt = date.fromisoformat(w_data.date) if isinstance(w_data.date, str) else w_data.date
+        stmt = select(GymWorkout).where(
+            GymWorkout.user_id == current_user.id,
+            GymWorkout.title == w_data.title,
+            GymWorkout.date == dt
+        )
+        existing = (await db.execute(stmt)).scalar_one_or_none()
+        if existing:
+            continue
+
+        workout = GymWorkout(
+            user_id=current_user.id,
+            date=dt,
+            title=w_data.title,
+            week_number=w_data.week_number,
+            day_number=w_data.day_number,
+            target_muscle=w_data.target_muscle,
+            notes=w_data.notes,
+            completed=False
+        )
+        db.add(workout)
+        await db.flush()
+
+        for ex_data in w_data.exercises:
+            ex = GymExercise(
+                workout_id=workout.id,
+                user_id=current_user.id,
+                exercise_name=ex_data.exercise_name,
+                muscle_group=ex_data.muscle_group,
+                sets_data=[s.model_dump() for s in ex_data.sets_data],
+                notes=ex_data.notes,
+            )
+            db.add(ex)
+        imported_workouts += 1
+
+    await db.commit()
+    return {"message": "Backup synced successfully", "imported_workouts": imported_workouts}
 
 
 # ─── SUMMARY & ANALYTICS ────────────────────────────────────────────────

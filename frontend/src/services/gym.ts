@@ -154,3 +154,8 @@ export async function getGymSummary(): Promise<GymSummary> {
   const { data } = await api.get<GymSummary>('/gym/summary')
   return data
 }
+
+export async function syncGymBackup(backupData: any): Promise<{ imported_workouts: number }> {
+  const { data } = await api.post<{ imported_workouts: number }>('/gym/sync-backup', backupData)
+  return data
+}
