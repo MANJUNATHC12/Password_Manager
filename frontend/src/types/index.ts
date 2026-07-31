@@ -189,3 +189,76 @@ export interface GroceryForm {
   notes: string
 }
 
+// ─── Gym ──────────────────────────────────────────────────────
+
+export interface GymSet {
+  set_number: number
+  reps: number
+  weight_kg: number
+  completed: boolean
+}
+
+export interface GymExercise {
+  id: string
+  workout_id: string
+  exercise_name: string
+  muscle_group: string
+  sets_data: GymSet[] | null
+  notes: string | null
+  created_at: string
+}
+
+export interface GymWorkout {
+  id: string
+  date: string // YYYY-MM-DD
+  title: string
+  week_number: number
+  day_number: number
+  target_muscle: string | null
+  notes: string | null
+  completed: boolean
+  created_at: string
+  updated_at: string
+  exercises: GymExercise[]
+}
+
+export interface ExercisePreset {
+  name: string
+  muscle: string
+  default_sets: number
+  default_reps: number
+  default_weight: number
+}
+
+export interface GymDietLog {
+  id: string
+  date: string // YYYY-MM-DD
+  meal_type: string // Breakfast, Lunch, Dinner, Snack
+  food_name: string
+  calories: number
+  protein_g: number
+  carbs_g: number
+  fat_g: number
+  notes: string | null
+  created_at: string
+}
+
+export interface GymWeightLog {
+  id: string
+  date: string // YYYY-MM-DD
+  weight_kg: number
+  body_fat_pct: number | null
+  notes: string | null
+  created_at: string
+}
+
+export interface GymSummary {
+  total_workouts: number
+  completed_workouts: number
+  current_week: number
+  avg_calories_per_day: number
+  latest_weight: number | null
+  weight_change: number | null
+}
+
+

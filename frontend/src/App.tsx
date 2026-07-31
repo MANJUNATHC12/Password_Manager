@@ -8,6 +8,7 @@ import { DocumentsPage } from '@/pages/DocumentsPage'
 import { ExpensesPage } from '@/pages/ExpensesPage'
 import { StatementsPage } from '@/pages/StatementsPage'
 import { GroceryPage } from '@/pages/GroceryPage'
+import { GymPage } from '@/pages/GymPage'
 
 export default function App() {
   return (
@@ -60,6 +61,16 @@ export default function App() {
           <PrivateRoute>
             <Layout>
               <GroceryPage />
+            </Layout>
+          </PrivateRoute>
+        }
+      />
+      <Route
+        path="/gym"
+        element={
+          <PrivateRoute>
+            <Layout>
+              <GymPage />
             </Layout>
           </PrivateRoute>
         }

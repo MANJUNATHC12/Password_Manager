@@ -1,8 +1,15 @@
 import axios from 'axios'
 
-let rawUrl =
-  import.meta.env.VITE_API_URL ||
-  'https://password-manager-api-t8m3.onrender.com/api/v1'
+let rawUrl = ''
+
+if (
+  typeof window !== 'undefined' &&
+  (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
+) {
+  rawUrl = 'http://localhost:8000/api/v1'
+} else {
+  rawUrl = import.meta.env.VITE_API_URL || 'https://password-manager-api-t8m3.onrender.com/api/v1'
+}
 
 // Strip trailing slashes
 rawUrl = rawUrl.replace(/\/+$/, '')

@@ -12,6 +12,8 @@ from sqlalchemy import (
     Boolean,
     ForeignKey,
     Index,
+    JSON,
+    Integer,
 )
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy.dialects.postgresql import UUID, JSONB
@@ -238,3 +240,161 @@ class GroceryItem(Base):
 
     def __repr__(self) -> str:
         return f"<GroceryItem(id={self.id}, name={self.name}, month={self.month})>"
+
+
+class GymWorkout(Base):
+    __tablename__ = "gym_workouts"
+
+    id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True),
+        primary_key=True,
+        default=uuid.uuid4,
+    )
+    user_id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True),
+        ForeignKey("users.id", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
+    )
+    date: Mapped[date] = mapped_column(Date, nullable=False)
+    title: Mapped[str] = mapped_column(Text, nullable=False)  # e.g., "Chest & Triceps Day"
+    week_number: Mapped[int] = mapped_column(Integer, nullable=False, default=1)
+    day_number: Mapped[int] = mapped_column(Integer, nullable=False, default=1)
+    target_muscle: Mapped[Optional[str]] = mapped_column(Text, nullable=True)  # e.g., "Chest"
+    notes: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    completed: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        default=lambda: datetime.now(timezone.utc),
+        nullable=False,
+    )
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        default=lambda: datetime.now(timezone.utc),
+        onupdate=lambda: datetime.now(timezone.utc),
+        nullable=False,
+    )
+
+    user: Mapped["User"] = relationship("User")
+    exercises: Mapped[list["GymExercise"]] = relationship(
+        "GymExercise",
+        back_populates="workout",
+        cascade="all, delete-orphan",
+        lazy="selectin",
+    )
+
+    __table_args__ = (
+        Index("ix_gym_workouts_user_date", "user_id", "date"),
+        Index("ix_gym_workouts_user_week", "user_id", "week_number"),
+    )
+
+    def __repr__(self) -> str:
+        return f"<GymWorkout(id={self.id}, title={self.title}, date={self.date})>"
+
+
+class GymExercise(Base):
+    __tablename__ = "gym_exercises"
+
+    id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True),
+        primary_key=True,
+        default=uuid.uuid4,
+    )
+    workout_id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True),
+        ForeignKey("gym_workouts.id", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
+    )
+    user_id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True),
+        ForeignKey("users.id", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
+    )
+    exercise_name: Mapped[str] = mapped_column(Text, nullable=False)
+    muscle_group: Mapped[str] = mapped_column(Text, nullable=False, default="Chest")
+    sets_data: Mapped[Optional[list]] = mapped_column(JSON, nullable=True)  # list of {set_number, reps, weight_kg, completed}
+    notes: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        default=lambda: datetime.now(timezone.utc),
+        nullable=False,
+    )
+
+    workout: Mapped["GymWorkout"] = relationship("GymWorkout", back_populates="exercises")
+
+    def __repr__(self) -> str:
+        return f"<GymExercise(id={self.id}, exercise_name={self.exercise_name})>"
+
+
+class GymDietLog(Base):
+    __tablename__ = "gym_diet_logs"
+
+    id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True),
+        primary_key=True,
+        default=uuid.uuid4,
+    )
+    user_id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True),
+        ForeignKey("users.id", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
+    )
+    date: Mapped[date] = mapped_column(Date, nullable=False)
+    meal_type: Mapped[str] = mapped_column(Text, nullable=False, default="Breakfast")  # Breakfast, Lunch, Dinner, Snack
+    food_name: Mapped[str] = mapped_column(Text, nullable=False)
+    calories: Mapped[Decimal] = mapped_column(Numeric(8, 2), nullable=False, default=0)
+    protein_g: Mapped[Decimal] = mapped_column(Numeric(8, 2), nullable=False, default=0)
+    carbs_g: Mapped[Decimal] = mapped_column(Numeric(8, 2), nullable=False, default=0)
+    fat_g: Mapped[Decimal] = mapped_column(Numeric(8, 2), nullable=False, default=0)
+    notes: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        default=lambda: datetime.now(timezone.utc),
+        nullable=False,
+    )
+
+    user: Mapped["User"] = relationship("User")
+
+    __table_args__ = (
+        Index("ix_gym_diet_user_date", "user_id", "date"),
+    )
+
+    def __repr__(self) -> str:
+        return f"<GymDietLog(id={self.id}, food_name={self.food_name}, calories={self.calories})>"
+
+
+class GymWeightLog(Base):
+    __tablename__ = "gym_weight_logs"
+
+    id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True),
+        primary_key=True,
+        default=uuid.uuid4,
+    )
+    user_id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True),
+        ForeignKey("users.id", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
+    )
+    date: Mapped[date] = mapped_column(Date, nullable=False)
+    weight_kg: Mapped[Decimal] = mapped_column(Numeric(6, 2), nullable=False)
+    body_fat_pct: Mapped[Optional[Decimal]] = mapped_column(Numeric(5, 2), nullable=True)
+    notes: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        default=lambda: datetime.now(timezone.utc),
+        nullable=False,
+    )
+
+    user: Mapped["User"] = relationship("User")
+
+    __table_args__ = (
+        Index("ix_gym_weight_user_date", "user_id", "date"),
+    )
+
+    def __repr__(self) -> str:
+        return f"<GymWeightLog(id={self.id}, weight_kg={self.weight_kg}, date={self.date})>"

@@ -98,3 +98,120 @@ class ErrorResponse(BaseModel):
 
 class SuccessResponse(BaseModel):
     message: str
+
+
+# ─── Gym Schemas ───────────────────────────────────────────────
+
+class GymSetSchema(BaseModel):
+    set_number: int = 1
+    reps: int = 10
+    weight_kg: float = 0.0
+    completed: bool = False
+
+
+class GymExerciseCreate(BaseModel):
+    exercise_name: str
+    muscle_group: str = "Chest"
+    sets_data: list[GymSetSchema] = Field(default_factory=list)
+    notes: Optional[str] = None
+
+
+class GymExerciseResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: UUID
+    workout_id: UUID
+    exercise_name: str
+    muscle_group: str
+    sets_data: Optional[list] = None
+    notes: Optional[str] = None
+    created_at: datetime
+
+
+class GymWorkoutCreate(BaseModel):
+    date: str  # YYYY-MM-DD
+    title: str
+    week_number: int = 1
+    day_number: int = 1
+    target_muscle: Optional[str] = None
+    notes: Optional[str] = None
+    exercises: list[GymExerciseCreate] = Field(default_factory=list)
+
+
+class GymWorkoutUpdate(BaseModel):
+    title: Optional[str] = None
+    week_number: Optional[int] = None
+    day_number: Optional[int] = None
+    target_muscle: Optional[str] = None
+    notes: Optional[str] = None
+    completed: Optional[bool] = None
+
+
+class GymWorkoutResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: UUID
+    date: str
+    title: str
+    week_number: int
+    day_number: int
+    target_muscle: Optional[str] = None
+    notes: Optional[str] = None
+    completed: bool
+    created_at: datetime
+    updated_at: datetime
+    exercises: list[GymExerciseResponse] = Field(default_factory=list)
+
+
+class GymDietCreate(BaseModel):
+    date: str  # YYYY-MM-DD
+    meal_type: str = "Breakfast"
+    food_name: str
+    calories: float = 0.0
+    protein_g: float = 0.0
+    carbs_g: float = 0.0
+    fat_g: float = 0.0
+    notes: Optional[str] = None
+
+
+class GymDietResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: UUID
+    date: str
+    meal_type: str
+    food_name: str
+    calories: float
+    protein_g: float
+    carbs_g: float
+    fat_g: float
+    notes: Optional[str] = None
+    created_at: datetime
+
+
+class GymWeightCreate(BaseModel):
+    date: str  # YYYY-MM-DD
+    weight_kg: float
+    body_fat_pct: Optional[float] = None
+    notes: Optional[str] = None
+
+
+class GymWeightResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: UUID
+    date: str
+    weight_kg: float
+    body_fat_pct: Optional[float] = None
+    notes: Optional[str] = None
+    created_at: datetime
+
+
+class GymSummaryResponse(BaseModel):
+    total_workouts: int
+    completed_workouts: int
+    total_exercises: int
+    avg_calories_per_day: float
+    latest_weight: Optional[float] = None
+    weight_change: Optional[float] = None
+    current_week: int

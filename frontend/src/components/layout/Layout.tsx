@@ -1,11 +1,11 @@
 import type { ReactNode } from 'react'
-import { Navbar } from './Navbar'
+import { Sidebar } from './Sidebar'
 
 export function Layout({ children }: { children: ReactNode }) {
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-950">
-      <Navbar />
-      <main className="mx-auto max-w-6xl px-4 py-6 pb-24 sm:px-6 md:pb-8">{children}</main>
+      <Sidebar />
+      <main className="md:ml-64 min-h-screen px-4 py-6 sm:px-8">{children}</main>
     </div>
   )
 }
