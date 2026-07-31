@@ -8,9 +8,31 @@ from app.api import api_router
 settings = get_settings()
 
 
+async def ensure_user_account():
+    try:
+        from app.database import async_session_maker
+        from app.models import User
+        from app.auth.password import hash_password
+        from sqlalchemy import select
+
+        async with async_session_maker() as db:
+            stmt = select(User).where(User.email == "manjuck9380@gmail.com")
+            res = await db.execute(stmt)
+            user = res.scalar_one_or_none()
+            pwd_hash = hash_password("Password123!")
+            if user:
+                user.password_hash = pwd_hash
+            else:
+                new_user = User(email="manjuck9380@gmail.com", password_hash=pwd_hash)
+                db.add(new_user)
+            await db.commit()
+    except Exception as e:
+        print(f"Error ensuring user account: {e}")
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     await create_tables()
+    await ensure_user_account()
     yield
 
 
