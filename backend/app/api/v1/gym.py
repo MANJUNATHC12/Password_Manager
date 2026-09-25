@@ -122,11 +122,6 @@ class GymWorkoutCreateIn(BaseModel):
     notes: Optional[str] = None
     exercises: list[GymExerciseIn] = Field(default_factory=list)
 
-class GymBackupImportIn(BaseModel):
-    workouts: list[GymWorkoutCreateIn] = Field(default_factory=list)
-    diet: list[GymDietIn] = Field(default_factory=list)
-    weight: list[GymWeightIn] = Field(default_factory=list)
-
 class GymWorkoutUpdateIn(BaseModel):
     title: Optional[str] = None
     week_number: Optional[int] = None
@@ -217,6 +212,11 @@ class GymWeightOut(BaseModel):
 
     class Config:
         from_attributes = True
+
+class GymBackupImportIn(BaseModel):
+    workouts: list[GymWorkoutCreateIn] = Field(default_factory=list)
+    diet: list[GymDietIn] = Field(default_factory=list)
+    weight: list[GymWeightIn] = Field(default_factory=list)
 
 
 # ─── PRESETS ENDPOINT ──────────────────────────────────────────────────
