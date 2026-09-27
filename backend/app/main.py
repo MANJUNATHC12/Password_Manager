@@ -31,6 +31,13 @@ async def ensure_user_account():
         print(f"Error ensuring user account: {e}")
 
 async def init_db_with_retries(max_retries: int = 10, delay: float = 3.0):
+    try:
+        from urllib.parse import urlparse
+        parsed = urlparse(settings.database_url)
+        print(f"[INFO] Target Database Host: '{parsed.hostname}' (Port: {parsed.port})")
+    except Exception:
+        pass
+
     for attempt in range(1, max_retries + 1):
         try:
             print(f"[INFO] Connecting to database (attempt {attempt}/{max_retries})...")
