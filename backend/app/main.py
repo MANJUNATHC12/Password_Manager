@@ -1,3 +1,4 @@
+import asyncio
 from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
@@ -29,10 +30,25 @@ async def ensure_user_account():
     except Exception as e:
         print(f"Error ensuring user account: {e}")
 
+async def init_db_with_retries(max_retries: int = 10, delay: float = 3.0):
+    for attempt in range(1, max_retries + 1):
+        try:
+            print(f"[INFO] Connecting to database (attempt {attempt}/{max_retries})...")
+            await create_tables()
+            await ensure_user_account()
+            print("[INFO] Database connected & tables initialized successfully.")
+            return
+        except Exception as e:
+            print(f"[WARNING] Database connection attempt {attempt} failed: {e}")
+            if attempt == max_retries:
+                print("[ERROR] Max database retries reached. Raising exception.")
+                raise e
+            await asyncio.sleep(delay)
+
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    await create_tables()
-    await ensure_user_account()
+    await init_db_with_retries()
     yield
 
 
