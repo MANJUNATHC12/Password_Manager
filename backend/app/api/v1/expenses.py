@@ -19,6 +19,7 @@ class ExpenseCreate(BaseModel):
     description: Optional[str] = Field(None, max_length=500)
     payment_method: Optional[str] = Field(None, max_length=50)
     spent_on: date
+    expiry_date: Optional[date] = None
 
 
 class ExpenseUpdate(BaseModel):
@@ -27,6 +28,7 @@ class ExpenseUpdate(BaseModel):
     description: Optional[str] = Field(None, max_length=500)
     payment_method: Optional[str] = Field(None, max_length=50)
     spent_on: Optional[date] = None
+    expiry_date: Optional[date] = None
 
 
 class ExpenseResponse(BaseModel):
@@ -36,6 +38,7 @@ class ExpenseResponse(BaseModel):
     description: Optional[str] = None
     payment_method: Optional[str] = None
     spent_on: date
+    expiry_date: Optional[date] = None
     created_at: datetime
     updated_at: datetime
 
@@ -115,6 +118,7 @@ async def create_expense(
         description=data.description,
         payment_method=data.payment_method,
         spent_on=data.spent_on,
+        expiry_date=data.expiry_date,
     )
     db.add(expense)
     await db.commit()
@@ -172,6 +176,7 @@ class ExpenseBatchItem(BaseModel):
     description: Optional[str] = Field(None, max_length=500)
     payment_method: Optional[str] = Field(None, max_length=50)
     spent_on: date
+    expiry_date: Optional[date] = None
 
 
 class ExpenseBatchResponse(BaseModel):
@@ -206,6 +211,7 @@ async def create_expenses_batch(
             description=item.description,
             payment_method=item.payment_method,
             spent_on=item.spent_on,
+            expiry_date=item.expiry_date,
         )
         db.add(expense)
         created.append(expense)
@@ -265,6 +271,71 @@ async def expense_summary(
     return ExpenseSummaryResponse(
         month=month, total=total, count=count, by_category=by_category
     )
+
+
+class ExpiringExpense(BaseModel):
+    id: UUID
+    amount: float
+    category: str
+    description: Optional[str] = None
+    payment_method: Optional[str] = None
+    spent_on: date
+    expiry_date: date
+    days_until_expiry: int
+    expired: bool
+
+    @field_validator("amount", mode="before")
+    @classmethod
+    def _to_float(cls, v):
+        return float(v) if v is not None else v
+
+    class Config:
+        from_attributes = True
+
+
+class ExpiringExpenseListResponse(BaseModel):
+    entries: list[ExpiringExpense]
+    total: int
+    days: int
+
+
+@router.get("/expiring", response_model=ExpiringExpenseListResponse)
+async def expiring_expenses(
+    days: int = Query(5, ge=0, le=365, description="Days ahead to check for expiration"),
+    current_user=Depends(get_current_user),
+    db: AsyncSession = Depends(get_db_dependency),
+):
+    result = await db.execute(
+        select(Expense).where(
+            Expense.user_id == current_user.id,
+            Expense.expiry_date.isnot(None),
+        )
+    )
+    expenses = result.scalars().all()
+    today = date.today()
+
+    items: list[ExpiringExpense] = []
+    for exp in expenses:
+        if not exp.expiry_date:
+            continue
+        delta = (exp.expiry_date - today).days
+        if delta <= days and delta >= -30:
+            items.append(
+                ExpiringExpense(
+                    id=exp.id,
+                    amount=float(exp.amount),
+                    category=exp.category,
+                    description=exp.description,
+                    payment_method=exp.payment_method,
+                    spent_on=exp.spent_on,
+                    expiry_date=exp.expiry_date,
+                    days_until_expiry=delta,
+                    expired=delta < 0,
+                )
+            )
+
+    items.sort(key=lambda x: x.days_until_expiry)
+    return ExpiringExpenseListResponse(entries=items, total=len(items), days=days)
 
 
 @router.get("/{expense_id}", response_model=ExpenseResponse)

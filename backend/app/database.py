@@ -2,6 +2,7 @@ from contextlib import asynccontextmanager
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession, async_sessionmaker
 from sqlalchemy.orm import DeclarativeBase
 
+from sqlalchemy import text
 from app.config import get_settings
 
 settings = get_settings()
@@ -28,6 +29,18 @@ class Base(DeclarativeBase):
 async def create_tables() -> None:
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
+        try:
+            await conn.execute(
+                text("ALTER TABLE expenses ADD COLUMN IF NOT EXISTS expiry_date DATE;")
+            )
+            await conn.execute(
+                text(
+                    "CREATE INDEX IF NOT EXISTS ix_expenses_user_expiry ON expenses (user_id, expiry_date);"
+                )
+            )
+        except Exception as e:
+            # Table might not exist or database dialect might vary
+            pass
 
 
 async def drop_tables() -> None:

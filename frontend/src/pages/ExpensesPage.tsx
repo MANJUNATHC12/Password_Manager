@@ -7,12 +7,16 @@ import {
   ChevronRight,
   AlertCircle,
   Upload,
+  Bell,
+  Clock,
 } from 'lucide-react'
 import { Button } from '@/components/ui/Button'
 import { Spinner } from '@/components/ui/Spinner'
 import { Modal } from '@/components/ui/Modal'
 import { ExpenseRow } from '@/components/expenses/ExpenseRow'
 import { ExpenseFormModal } from '@/components/expenses/ExpenseForm'
+import { useExpiringExpenses } from '@/hooks/useExpiringExpenses'
+import { cn } from '@/utils/cn'
 import {
   listExpenses,
   getExpenseSummary,
@@ -26,6 +30,7 @@ import {
   categoryColor,
   currentMonth,
   formatCurrency,
+  formatDate,
   formatMonthLabel,
 } from '@/config/expenses'
 import type { Expense, ExpenseForm, ExpenseSummary } from '@/types'
@@ -64,7 +69,54 @@ export function ExpensesPage() {
   const [deleting, setDeleting] = useState(false)
 
   const [reloadToken, setReloadToken] = useState(0)
-  const reload = () => setReloadToken((t) => t + 1)
+  const reload = () => {
+    setReloadToken((t) => t + 1)
+    refreshExpiring()
+  }
+
+  const { items: expiringExpenses, refresh: refreshExpiring } = useExpiringExpenses(5)
+  const [notificationPerm, setNotificationPerm] = useState<string>(
+    typeof window !== 'undefined' && 'Notification' in window
+      ? Notification.permission
+      : 'default',
+  )
+
+  const requestNotificationPermission = async () => {
+    if (typeof window === 'undefined' || !('Notification' in window)) return
+    try {
+      const res = await Notification.requestPermission()
+      setNotificationPerm(res)
+      if (res === 'granted' && expiringExpenses.length > 0) {
+        const first = expiringExpenses[0]
+        new Notification('🔔 Password Manager: Expense Alert', {
+          body: `${first.description || first.category} (${formatCurrency(first.amount)}) last date is near: ${formatDate(first.expiry_date)}.`,
+        })
+      }
+    } catch {
+      // ignore
+    }
+  }
+
+  useEffect(() => {
+    if (
+      notificationPerm === 'granted' &&
+      expiringExpenses.length > 0 &&
+      typeof window !== 'undefined'
+    ) {
+      const key = `notified_exp_${new Date().toISOString().slice(0, 10)}`
+      if (!sessionStorage.getItem(key)) {
+        const first = expiringExpenses[0]
+        try {
+          new Notification('🔔 Expense Renewal Alert', {
+            body: `${first.description || first.category} expires in ${first.days_until_expiry <= 0 ? 'today/expired' : `${first.days_until_expiry} day(s)`} (${formatDate(first.expiry_date)}).`,
+          })
+          sessionStorage.setItem(key, '1')
+        } catch {
+          // ignore
+        }
+      }
+    }
+  }, [expiringExpenses, notificationPerm])
 
   useEffect(() => {
     const t = setTimeout(() => setSearch(searchInput.trim()), 300)
@@ -176,6 +228,112 @@ export function ExpensesPage() {
           </Button>
         </div>
       </div>
+
+      {/* Expiring / Renewal Notification Alert Banner (<= 5 days) */}
+      {expiringExpenses.length > 0 && (
+        <div className="rounded-2xl border border-amber-300/80 bg-gradient-to-r from-amber-50 via-amber-50/70 to-orange-50 p-4 shadow-sm dark:border-amber-800/80 dark:from-amber-950/40 dark:via-amber-950/20 dark:to-orange-950/30">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex items-center gap-3">
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-amber-500 text-white shadow-md">
+                <Bell className="h-5 w-5 animate-pulse" />
+              </div>
+              <div>
+                <div className="flex items-center gap-2">
+                  <h3 className="text-base font-bold text-amber-950 dark:text-amber-100">
+                    {expiringExpenses.length} Expense{expiringExpenses.length === 1 ? '' : 's'} Due / Expiring Soon
+                  </h3>
+                  <span className="rounded-full bg-amber-200 px-2 py-0.5 text-[11px] font-bold text-amber-900 dark:bg-amber-900 dark:text-amber-200">
+                    Within 5 Days
+                  </span>
+                </div>
+                <p className="mt-0.5 text-xs text-amber-800/90 dark:text-amber-300/90">
+                  Your bus passes, SIM recharges, or recurring expenses nearing their last date.
+                </p>
+              </div>
+            </div>
+
+            {typeof window !== 'undefined' &&
+              'Notification' in window &&
+              notificationPerm !== 'granted' && (
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  onClick={requestNotificationPermission}
+                  className="self-start border-amber-300 bg-white/90 text-xs text-amber-900 hover:bg-amber-100 dark:border-amber-700 dark:bg-slate-800 dark:text-amber-200 sm:self-auto"
+                >
+                  <Bell className="mr-1.5 h-3.5 w-3.5 text-amber-600" />
+                  Enable App Notifications
+                </Button>
+              )}
+          </div>
+
+          <div className="mt-3.5 grid grid-cols-1 gap-2.5 sm:grid-cols-2 lg:grid-cols-3">
+            {expiringExpenses.map((item) => (
+              <div
+                key={item.id}
+                className="flex items-center justify-between rounded-xl border border-amber-200/90 bg-white/90 p-3 shadow-xs dark:border-amber-900/50 dark:bg-slate-900/90"
+              >
+                <div className="min-w-0 flex-1 pr-2">
+                  <p className="truncate text-sm font-semibold text-slate-900 dark:text-white">
+                    {item.description || item.category}
+                  </p>
+                  <div className="mt-0.5 flex items-center gap-1.5 text-xs text-slate-500 dark:text-slate-400">
+                    <span className="font-medium text-slate-700 dark:text-slate-300">
+                      {formatCurrency(item.amount)}
+                    </span>
+                    <span>·</span>
+                    <span className="flex items-center gap-1">
+                      <Clock className="h-3 w-3 text-amber-600 dark:text-amber-400" />
+                      Ends: {formatDate(item.expiry_date)}
+                    </span>
+                  </div>
+                </div>
+
+                <div className="flex shrink-0 flex-col items-end gap-1">
+                  <span
+                    className={cn(
+                      'rounded-md px-2 py-0.5 text-[11px] font-bold',
+                      item.expired
+                        ? 'bg-red-100 text-red-700 dark:bg-red-900/60 dark:text-red-300'
+                        : item.days_until_expiry === 0
+                          ? 'animate-pulse bg-red-100 font-extrabold text-red-800 dark:bg-red-900/60 dark:text-red-200'
+                          : 'bg-amber-100 text-amber-900 dark:bg-amber-900/50 dark:text-amber-200',
+                    )}
+                  >
+                    {item.expired
+                      ? `Expired ${Math.abs(item.days_until_expiry)}d ago`
+                      : item.days_until_expiry === 0
+                        ? 'Expires Today!'
+                        : `Due in ${item.days_until_expiry} day${item.days_until_expiry === 1 ? '' : 's'}`}
+                  </span>
+                  <button
+                    onClick={() => {
+                      const match = expenses.find((e) => e.id === item.id)
+                      if (match) openEdit(match)
+                      else {
+                        openEdit({
+                          id: item.id,
+                          amount: item.amount,
+                          category: item.category,
+                          description: item.description,
+                          payment_method: item.payment_method,
+                          spent_on: item.spent_on,
+                          expiry_date: item.expiry_date,
+                          created_at: '',
+                          updated_at: '',
+                        })
+                      }
+                    }}
+                    className="text-[11px] font-semibold text-primary-600 hover:underline dark:text-primary-400"
+                  >
+                    Renew / Edit
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Month selector */}
       <div className="flex items-center gap-3">

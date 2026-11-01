@@ -80,6 +80,7 @@ export interface Expense {
   description: string | null
   payment_method: string | null
   spent_on: string // YYYY-MM-DD
+  expiry_date: string | null // YYYY-MM-DD
   created_at: string
   updated_at: string
 }
@@ -112,6 +113,25 @@ export interface ExpenseForm {
   description: string
   payment_method: string
   spent_on: string
+  expiry_date?: string
+}
+
+export interface ExpiringExpense {
+  id: string
+  amount: number
+  category: string
+  description: string | null
+  payment_method: string | null
+  spent_on: string
+  expiry_date: string
+  days_until_expiry: number
+  expired: boolean
+}
+
+export interface ExpiringExpenseList {
+  entries: ExpiringExpense[]
+  total: number
+  days: number
 }
 
 export interface ExpiringDocument {

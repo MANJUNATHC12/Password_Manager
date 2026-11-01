@@ -16,6 +16,7 @@ import {
 } from 'lucide-react'
 import { useAuth } from '@/hooks/useAuth'
 import { useExpiringDocuments } from '@/hooks/useExpiringDocuments'
+import { useExpiringExpenses } from '@/hooks/useExpiringExpenses'
 import { useTheme } from '@/context/ThemeContext'
 import { Button } from '@/components/ui/Button'
 import { cn } from '@/utils/cn'
@@ -32,6 +33,7 @@ const navItems = [
 export function Sidebar() {
   const { user, logout } = useAuth()
   const { count: expiringCount } = useExpiringDocuments()
+  const { count: expiringExpensesCount } = useExpiringExpenses(5)
   const { theme, toggleTheme } = useTheme()
   const [loggingOut, setLoggingOut] = useState(false)
   const [mobileOpen, setMobileOpen] = useState(false)
@@ -125,6 +127,15 @@ export function Sidebar() {
                   className="flex h-5 min-w-[1.25rem] items-center justify-center rounded-full bg-red-500 px-1.5 text-[11px] font-bold text-white shadow-sm"
                 >
                   {expiringCount}
+                </span>
+              )}
+
+              {to === '/expenses' && expiringExpensesCount > 0 && (
+                <span
+                  title={`${expiringExpensesCount} expense(s) near last date (within 5 days)`}
+                  className="flex h-5 min-w-[1.25rem] items-center justify-center rounded-full bg-amber-500 px-1.5 text-[11px] font-bold text-white shadow-sm"
+                >
+                  {expiringExpensesCount}
                 </span>
               )}
             </NavLink>

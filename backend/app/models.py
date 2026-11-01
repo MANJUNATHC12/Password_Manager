@@ -172,6 +172,7 @@ class Expense(Base):
     description: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
     payment_method: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
     spent_on: Mapped[date] = mapped_column(Date, nullable=False)
+    expiry_date: Mapped[Optional[date]] = mapped_column(Date, nullable=True)
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),
         default=lambda: datetime.now(timezone.utc),
@@ -189,6 +190,7 @@ class Expense(Base):
     __table_args__ = (
         Index("ix_expenses_user_spent_on", "user_id", "spent_on"),
         Index("ix_expenses_user_category", "user_id", "category"),
+        Index("ix_expenses_user_expiry", "user_id", "expiry_date"),
     )
 
     def __repr__(self) -> str:
